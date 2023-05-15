@@ -1,5 +1,5 @@
-name: Setup Go environment
-description: Install go with optimal caching and add it to the PATH
+name: Setup Go environment - with specific cache key
+description: Install go and add it to the PATH
 author: 'hermanbanken'
 
 inputs:
