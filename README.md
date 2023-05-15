@@ -14,7 +14,7 @@ jobs:
   lint:
   steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-go@v3
+    - uses: hermanbanken/setup-go@v3
       with:
         key: 'job:lint:go'
     - run: go version
@@ -22,14 +22,15 @@ jobs:
   buildA:
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: hermanbanken/setup-go@v3
         with:
           key: 'toolA'
       - run: go build ./cmd/a
 
 buildB:
   steps:
-    - uses: actions/setup-go@v3
+    - uses: actions/checkout@v3
+    - uses: hermanbanken/setup-go@v3
       with:
         key: 'toolB'
     - run: go build ./cmd/b
