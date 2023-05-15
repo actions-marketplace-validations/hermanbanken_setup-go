@@ -1,31 +1,38 @@
-name: 'Setup Go environment'
-description: 'Setup a Go environment and add it to the PATH'
-author: 'GitHub'
+name: Setup Go environment
+description: Install go with optimal caching and add it to the PATH
+author: 'hermanbanken'
+
 inputs:
+  key: # id of input
+    description: 'How to identify the cache unique per step; example "job:lint:go"'
+    required: true
   go-version:
-    description: 'The Go version to download (if necessary) and use. Supports semver spec and ranges.'
+    description: which Go version to use; fixed
+    default: ""
   go-version-file:
-    description: 'Path to the go.mod or go.work file.'
-  check-latest:
-    description: 'Set this option to true if you want the action to always check for the latest available version that satisfies the version spec'
-    default: false
+    description: which Go version to use; read from go.mod file
+    default: "go.mod"
   token:
     description: Used to pull node distributions from go-versions. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
-  cache:
-    description: Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
-    default: false
-  cache-dependency-path:
-    description: 'Used to specify the path to a dependency file - go.sum'
   architecture:
     description: 'Target architecture for Go to use. Examples: x86, x64. Will use system architecture by default.'
-outputs:
-  go-version:
-    description: 'The installed Go version. Useful when given a version range as input.'
-  cache-hit:
-    description: 'A boolean value to indicate if a cache was hit'
+
 runs:
-  using: 'node16'
-  main: 'dist/setup/index.js'
-  post: 'dist/cache-save/index.js'
-  post-if: success()
+  using: "composite"
+  steps:
+    - name: Cache go
+      uses: actions/cache@v3
+      with:
+        key: ${{ inputs.key }}
+        path: | # what setup-go caches too (runs `go env GOMODCACHE` and `go env GOCACHE` to compute this, but it is static)
+          /home/runner/go/pkg/mod
+          /home/runner/.cache/go-build
+    - name: Setup go
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ inputs.go-version }}
+        go-version-file: ${{ inputs.go-version-file }}
+        token: ${{ inputs.token }}
+        architecture: ${{ inputs.architecture }}
+        cache: false
